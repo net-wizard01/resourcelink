@@ -1,0 +1,22 @@
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: resourcelink-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: resourcelink
+      POSTGRES_PASSWORD: resourcelink
+      POSTGRES_DB: resourcelink
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./sql/001_init.sql:/docker-entrypoint-initdb.d/001_init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U resourcelink -d resourcelink"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  pgdata:
