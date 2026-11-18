@@ -44,30 +44,33 @@ export default function LoginPage() {
     setIsLoading(true);
     
     try {
+      let res;
       if (isRegister) {
         const payload = { 
           ...form, 
           lat: parseFloat(form.lat || '40.7128'), 
           lon: parseFloat(form.lon || '-74.0060') 
         };
-        const res = await api.post('/auth/register', payload);
-        login(res.data.token, res.data.user);
+        res = await api.post('/auth/register', payload);
       } else {
-        const res = await api.post('/auth/login', {
+        res = await api.post('/auth/login', {
           email: form.email, password: form.password
         });
-        login(res.data.token, res.data.user);
       }
+
+      // Safely pass the tokens to the context
+      login(res.data.token, res.data.refreshToken || '', res.data.user);
       router.push('/');
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Authentication failed');
+      console.error("Login error:", err);
+      setError(err.response?.data?.error || 'Authentication failed. Please check your credentials.');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex bg-white">
+    <div className="min-h-screen flex bg-white dark:bg-slate-950">
       <div className="hidden lg:flex w-1/2 bg-gradient-to-br from-blue-700 via-blue-600 to-indigo-800 p-12 flex-col justify-between relative overflow-hidden">
         <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob"></div>
         <div className="absolute top-[20%] right-[-10%] w-96 h-96 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob animation-delay-2000"></div>
@@ -99,55 +102,55 @@ export default function LoginPage() {
         </div>
       </div>
 
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-gray-50">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-gray-50 dark:bg-slate-900">
         <div className="w-full max-w-md space-y-8">
           <div className="text-center lg:text-left">
-            <h2 className="text-3xl font-bold text-gray-900">
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
               {isRegister ? 'Create an account' : 'Welcome back'}
             </h2>
-            <p className="mt-2 text-gray-500">
+            <p className="mt-2 text-gray-500 dark:text-slate-400">
               {isRegister ? 'Start trading with your neighbors today.' : 'Enter your credentials to access your account.'}
             </p>
           </div>
 
           {error && (
-            <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-md">
-              <p className="text-sm text-red-700">{error}</p>
+            <div className="bg-red-50 dark:bg-red-900/30 border-l-4 border-red-500 p-4 rounded-md">
+              <p className="text-sm text-red-700 dark:text-red-400">{error}</p>
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
             {isRegister && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                <input type="text" required className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-black"
+                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Full Name</label>
+                <input type="text" required className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-black dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                   value={form.full_name} onChange={e => setForm({...form, full_name: e.target.value})} />
               </div>
             )}
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email address</label>
-              <input type="email" required className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-black"
+              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Email address</label>
+              <input type="email" required className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-black dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                 value={form.email} onChange={e => setForm({...form, email: e.target.value})} />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-              <input type="password" required className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-black"
+              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Password</label>
+              <input type="password" required className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-black dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                 value={form.password} onChange={e => setForm({...form, password: e.target.value})} />
             </div>
 
             {isRegister && (
-              <div className="bg-blue-50 p-4 rounded-lg border border-blue-100 space-y-3">
-                <label className="block text-sm font-medium text-blue-900">Your Location</label>
-                <p className="text-xs text-blue-700">We use this to find neighbors within 5km. Your exact address is never shown.</p>
+              <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-100 dark:border-blue-900/50 space-y-3">
+                <label className="block text-sm font-medium text-blue-900 dark:text-blue-300">Your Location</label>
+                <p className="text-xs text-blue-700 dark:text-blue-400">We use this to find neighbors within 5km. Your exact address is never shown.</p>
                 
                 {!form.lat ? (
-                  <button type="button" onClick={detectLocation} className="w-full flex items-center justify-center gap-2 bg-white border border-blue-200 text-blue-700 py-2 rounded-md hover:bg-blue-100 transition-colors text-sm font-medium">
+                  <button type="button" onClick={detectLocation} className="w-full flex items-center justify-center gap-2 bg-white dark:bg-slate-800 border border-blue-200 dark:border-slate-700 text-blue-700 dark:text-blue-300 py-2 rounded-md hover:bg-blue-100 dark:hover:bg-slate-700 transition-colors text-sm font-medium">
                     <MapPin size={16} /> {locationStatus || 'Detect My Location'}
                   </button>
                 ) : (
-                  <div className="flex items-center justify-between bg-white border border-green-200 text-green-700 px-3 py-2 rounded-md text-sm font-medium">
+                  <div className="flex items-center justify-between bg-white dark:bg-slate-800 border border-green-200 dark:border-green-800/50 text-green-700 dark:text-green-400 px-3 py-2 rounded-md text-sm font-medium">
                     <span className="flex items-center gap-2"><CheckCircle2 size={16} /> Location Set</span>
                     <button type="button" onClick={() => { setForm({...form, lat: '', lon: ''}); setLocationStatus(''); }} className="text-xs text-gray-500 hover:text-red-500 underline">
                       Reset
@@ -164,9 +167,9 @@ export default function LoginPage() {
           </form>
 
           <div className="text-center">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 dark:text-slate-400">
               {isRegister ? 'Already have an account?' : "Don't have an account?"}{' '}
-              <button onClick={() => { setIsRegister(!isRegister); setError(''); }} className="font-semibold text-blue-600 hover:text-blue-500 transition-colors">
+              <button onClick={() => { setIsRegister(!isRegister); setError(''); }} className="font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-500 transition-colors">
                 {isRegister ? 'Sign in' : 'Register now'}
               </button>
             </p>

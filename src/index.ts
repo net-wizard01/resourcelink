@@ -1,6 +1,7 @@
 import cors from 'cors';
 import userRoutes from './routes/user';
 import reviewRoutes from './routes/review';
+import messageRoutes from './routes/message';
 import reviewRoutes from './routes/review';
 import express from 'express';
 import { config } from './config';
@@ -28,6 +29,7 @@ app.use('/api/listings', listingRoutes);
 app.use('/api/ledger', ledgerRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/reviews', reviewRoutes);
+app.use('/api/messages', messageRoutes);
 app.use('/api/reviews', reviewRoutes);
 
 // Global Error Handler (must be the last middleware)

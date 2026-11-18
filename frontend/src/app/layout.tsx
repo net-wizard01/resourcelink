@@ -1,4 +1,5 @@
 import { AuthProvider } from '@/context/AuthContext';
+import { ThemeProvider } from 'next-themes';
 import './globals.css';
 
 export const metadata = {
@@ -8,9 +9,11 @@ export const metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body className="font-sans antialiased text-gray-900 bg-gray-50">
-        <AuthProvider>{children}</AuthProvider>
+    <html lang="en" suppressHydrationWarning>
+      <body className="font-sans antialiased">
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <AuthProvider>{children}</AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -1,7 +1,48 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
 body {
   font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  @apply bg-[#F8FAFC] text-slate-900 transition-colors duration-300;
+}
+
+.dark body {
+  @apply bg-[#0F0F0F] text-gray-100; /* YouTube style deep dark */
+}
+
+/* --- GLOBAL DARK MODE OVERRIDES --- */
+/* This automatically flips the colors for the whole app */
+
+.dark .bg-white { background-color: #1A1A1A !important; border-color: #2A2A2A !important; }
+.dark .bg-gray-50 { background-color: #222222 !important; }
+.dark .bg-gray-100 { background-color: #2A2A2A !important; }
+
+
+/* Text colors */
+.dark .text-gray-900, .dark .text-gray-800, .dark .text-black { color: #F3F4F6 !important; }
+.dark .text-gray-700, .dark .text-gray-600 { color: #D1D5DB !important; }
+.dark .text-gray-500 { color: #9CA3AF !important; }
+
+/* Borders */
+.dark .border-gray-100, .dark .border-gray-200, .dark .border-gray-300 { border-color: #2A2A2A !important; }
+
+/* Inputs */
+.dark input, .dark textarea, .dark select {
+  background-color: #1A1A1A !important;
+  color: #F3F4F6 !important;
+  border-color: #2A2A2A !important;
+}
+
+/* Specific UI elements */
+.dark .bg-blue-50 { background-color: #1E3A8A !important; color: #93C5FD !important; }
+.dark .bg-green-50 { background-color: #064E3B !important; color: #6EE7B7 !important; }
+.dark .bg-red-50 { background-color: #7F1D1D !important; color: #FCA5A5 !important; }
+.dark .bg-yellow-50 { background-color: #78350F !important; color: #FCD34D !important; }
+.dark .bg-orange-50 { background-color: #7C2D12 !important; color: #FDBA74 !important; }
+
+/* Shadows */
+.dark .shadow-sm, .dark .shadow-md, .dark .shadow-lg {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3) !important;
 }
 
 @keyframes blob {

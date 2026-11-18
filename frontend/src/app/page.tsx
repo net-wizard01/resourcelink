@@ -10,7 +10,7 @@ import MapView from '@/components/MapView';
 import { Clock, ShieldCheck, Activity } from 'lucide-react';
 
 export default function Dashboard() {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const router = useRouter();
   const [balance, setBalance] = useState(0);
   const [nearby, setNearby] = useState<any[]>([]);
@@ -22,7 +22,6 @@ export default function Dashboard() {
       return; 
     }
     
-    // We pass the user ID to ensure we only fetch when user is fully loaded
     refreshData(user.id);
   }, [user, router]);
 
@@ -37,13 +36,15 @@ export default function Dashboard() {
 
       const listingsRes = await api.get('/listings/nearby');
       const myId = userId.toLowerCase().trim();
-      const others = listingsRes.data.filter((l: any) => l.user_id.toLowerCase().trim() !== myId);
-      setNearby(others);
+      
+      // Filter out our own listings
+      const others = listingsRes.data.filter((l: any) => l.user_id && l.user_id.toLowerCase().trim() !== myId);   setNearby(others);
     } catch (err) {
       console.error("Dashboard load error:", err);
     }
   };
 
+  if (isLoading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   if (!user) return null;
 
   return (
@@ -60,6 +61,7 @@ export default function Dashboard() {
             <div className="flex items-center gap-2"><Activity size={18} className="text-blue-500"/> Hyper-local 5km</div>
           </div>
         </div>
+        
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
           <div className="space-y-6">
             <div className="bg-gradient-to-br from-blue-600 to-indigo-700 p-6 rounded-2xl shadow-lg text-white">
@@ -70,6 +72,7 @@ export default function Dashboard() {
               </div>
               <p className="text-sm text-blue-200 mt-4">Time is the only currency here. Trade your skills or tools to earn more.</p>
             </div>
+            
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
               <h3 className="font-bold text-gray-800 mb-4">How it works</h3>
               <ul className="space-y-4 text-sm text-gray-600">
@@ -78,7 +81,7 @@ export default function Dashboard() {
                 <li className="flex gap-3"><div className="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold shrink-0">3</div> Trade hours and build community.</li>
               </ul>
             </div>
-            
+
             {/* Interactive Map */}
             {userLocation.lat !== 0 && (
               <div className="bg-white p-2 rounded-2xl shadow-sm border border-gray-100">
@@ -86,9 +89,11 @@ export default function Dashboard() {
               </div>
             )}
           </div>
+          
           <div>
             <CreateListing onCreated={() => refreshData(user.id)} />
           </div>
+          
           <div className="lg:col-span-1">
             <NearbyListings listings={nearby} onTraded={() => refreshData(user.id)} />
           </div>

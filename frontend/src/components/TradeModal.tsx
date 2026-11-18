@@ -3,11 +3,14 @@ import { useState, useEffect } from 'react';
 import { api } from '@/lib/api';
 import { X, ShieldCheck, Clock, CheckCircle2 } from 'lucide-react';
 import StarRating from './StarRating';
+import ChatModal from './ChatModal';
+import { MessageSquare } from 'lucide-react';
 
 export default function TradeModal({ listing, onClose, onSuccess }: { listing: any, onClose: () => void, onSuccess: () => void }) {
   const [profile, setProfile] = useState<any>(null);
   const [hours, setHours] = useState('1.0');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showChat, setShowChat] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -87,13 +90,22 @@ export default function TradeModal({ listing, onClose, onSuccess }: { listing: a
               <p className="text-red-500 text-sm bg-red-50 p-2 rounded">{error}</p>
             ) : profile ? (
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xl font-bold">
-                  {profile.full_name.charAt(0)}
-                </div>
+                {profile.avatar_url ? (
+                  <img src={profile.avatar_url} alt={profile.full_name} className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm" />
+                ) : (
+                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 text-white rounded-full flex items-center justify-center text-xl font-bold shadow-sm">
+                    {profile.full_name.charAt(0)}
+                  </div>
+                )}
                 <div>
-                  <p className="font-bold text-gray-800 flex items-center gap-1">
-                    {profile.full_name} <ShieldCheck size={16} className="text-green-500" />
-                  </p>
+                  <div className="flex justify-between items-start w-full">
+                    <p className="font-bold text-gray-800 flex items-center gap-1">
+                      {profile.full_name} <ShieldCheck size={16} className="text-green-500" />
+                    </p>
+                    <button onClick={() => setShowChat(true)} className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded-md font-semibold hover:bg-blue-100 flex items-center gap-1">
+                      <MessageSquare size={12} /> Message
+                    </button>
+                  </div>
                   <div className="flex items-center gap-2 mt-1">
                     <StarRating rating={Math.round(Number(profile.average_rating) || 0)} readonly />
                     <span className="text-sm font-medium text-gray-600">
@@ -143,6 +155,9 @@ export default function TradeModal({ listing, onClose, onSuccess }: { listing: a
           </form>
         </div>
       </div>
+      {showChat && (
+        <ChatModal listing={listing} otherUser={profile} onClose={() => setShowChat(false)} />
+      )}
     </div>
   );
 }
