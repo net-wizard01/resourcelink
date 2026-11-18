@@ -58,19 +58,26 @@ export default function LoginPage() {
         });
       }
 
-      // Safely pass the tokens to the context
-      login(res.data.token, res.data.refreshToken || '', res.data.user);
-      router.push('/');
+      if (res.data.token && res.data.user) {
+        login(res.data.token, res.data.refreshToken || '', res.data.user);
+        setTimeout(() => { window.location.href = '/'; }, 300);
+      } else {
+        throw new Error("Invalid response from server.");
+      }
     } catch (err: any) {
-      console.error("Login error:", err);
-      setError(err.response?.data?.error || 'Authentication failed. Please check your credentials.');
+      console.error("Auth Error:", err);
+      if (err.response) {
+        setError(err.response.data?.error || 'Authentication failed');
+      } else {
+        setError(err.message || 'An unexpected error occurred');
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex bg-white dark:bg-slate-950">
+    <div className="min-h-screen flex bg-white dark:bg-slate-950 transition-colors">
       <div className="hidden lg:flex w-1/2 bg-gradient-to-br from-blue-700 via-blue-600 to-indigo-800 p-12 flex-col justify-between relative overflow-hidden">
         <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob"></div>
         <div className="absolute top-[20%] right-[-10%] w-96 h-96 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob animation-delay-2000"></div>
@@ -102,7 +109,7 @@ export default function LoginPage() {
         </div>
       </div>
 
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-gray-50 dark:bg-slate-900">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-gray-50 dark:bg-slate-900 transition-colors">
         <div className="w-full max-w-md space-y-8">
           <div className="text-center lg:text-left">
             <h2 className="text-3xl font-bold text-gray-900 dark:text-white">

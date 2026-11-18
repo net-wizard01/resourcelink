@@ -77,3 +77,31 @@ export const deleteChat = async (req: AuthRequest, res: Response) => {
     res.status(500).json({ error: 'Failed to delete chat' });
   }
 };
+
+export const getUnreadCount = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user!.id;
+    // Count messages sent to this user. (For simplicity, we assume all received messages are unread until they open the chat)
+    const [result]: any = await pool.query(
+      `SELECT COUNT(*) as count FROM messages WHERE receiver_id = ? AND is_read = FALSE`,
+      [userId]
+    );
+    res.json({ count: result[0].count });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to count messages' });
+  }
+};
+
+export const markMessagesAsRead = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user!.id;
+    const { otherUserId, listingId } = req.body;
+    await pool.query(
+      `UPDATE messages SET is_read = TRUE WHERE receiver_id = ? AND sender_id = ? AND listing_id = ?`,
+      [userId, otherUserId, listingId]
+    );
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to mark as read' });
+  }
+};

@@ -89,3 +89,17 @@ export const updateProfile = async (req: AuthRequest, res: Response) => {
     res.status(500).json({ error: 'Failed to update profile' });
   }
 };
+
+export const getPendingTradesCount = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user!.id;
+    // Count trades where this user is the receiver and status is PENDING
+    const [result]: any = await pool.query(
+      `SELECT COUNT(*) as count FROM time_ledger WHERE receiver_id = ? AND status = 'PENDING'`,
+      [userId]
+    );
+    res.json({ count: result[0].count });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to count trades' });
+  }
+};

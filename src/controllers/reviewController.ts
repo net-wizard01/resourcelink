@@ -40,3 +40,21 @@ export const submitReview = async (req: AuthRequest, res: Response) => {
     res.status(500).json({ error: 'Failed to submit review' });
   }
 };
+
+export const getReviewsForUser = async (req: AuthRequest, res: Response) => {
+  try {
+    const { userId } = req.params;
+    const [reviews]: any = await pool.query(
+      `SELECT r.id, r.rating, r.comment, r.created_at, u.full_name as reviewer_name, u.avatar_url as reviewer_avatar
+       FROM reviews r
+       JOIN users u ON r.reviewer_id = u.id
+       WHERE r.reviewee_id = ?
+       ORDER BY r.created_at DESC`,
+      [userId]
+    );
+    res.json(reviews);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to fetch reviews' });
+  }
+};

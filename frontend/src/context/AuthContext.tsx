@@ -1,7 +1,6 @@
 'use client';
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
-import { api } from '@/lib/api';
+import { usePathname, useRouter } from 'next/navigation';
 
 interface User {
   id: string;
@@ -21,30 +20,40 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const router = useRouter();
+  const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
 
+  // 1. First, mark the component as mounted
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // 2. Only check auth AFTER mounting
+  useEffect(() => {
+    if (!mounted) return;
+
     try {
       const storedUser = localStorage.getItem('user');
       const token = localStorage.getItem('token');
       
-      // Guard against the literal string "undefined"
-      if (storedUser && storedUser !== 'undefined' && token) {
+      if (storedUser && token && storedUser !== 'undefined') {
         setUser(JSON.parse(storedUser));
-      } else if (pathname !== '/login') {
-        router.push('/login');
+      } else {
+        setUser(null);
+        // Only redirect if we aren't already on login
+        if (pathname !== '/login') {
+          router.push('/login');
+        }
       }
     } catch (error) {
-      console.error("Failed to parse user data", error);
-      localStorage.removeItem('user');
-      localStorage.removeItem('token');
-      localStorage.removeItem('refreshToken');
+      console.error("Auth error:", error);
+      localStorage.clear();
       if (pathname !== '/login') router.push('/login');
     } finally {
       setIsLoading(false);
     }
-  }, [pathname, router]);
+  }, [mounted, pathname, router]);
 
   const login = (token: string, refreshToken: string, user: User) => {
     localStorage.setItem('token', token);
@@ -53,18 +62,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(user);
   };
 
-  const logout = async () => {
-    try {
-      const refreshToken = localStorage.getItem('refreshToken');
-      if (refreshToken) await api.post('/auth/logout', { refreshToken });
-    } catch (e) {}
-    
-    localStorage.removeItem('token');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('user');
+  const logout = () => {
+    localStorage.clear();
     setUser(null);
     router.push('/login');
   };
+
+  // Prevent rendering children until we know the auth state
+  // If we don't do this, protected pages will flash and redirect
+  if (!mounted || isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-950">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   return (
     <AuthContext.Provider value={{ user, login, logout, isLoading }}>

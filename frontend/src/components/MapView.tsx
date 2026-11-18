@@ -32,7 +32,7 @@ export default function MapView({ listings, userLat, userLon }: { listings: any[
   if (!L || !userLat || !userLon) return <div className="h-full w-full bg-gray-100 animate-pulse rounded-xl flex items-center justify-center text-gray-400">Loading Map...</div>;
 
   return (
-    <div className="h-[400px] w-full rounded-xl overflow-hidden border border-gray-200 z-0 relative">
+    <div className="h-[300px] w-full rounded-xl overflow-hidden border border-gray-200 dark:border-slate-700 z-0 relative">
       <MapContainer center={[userLat, userLon]} zoom={13} scrollWheelZoom={false} style={{ height: '100%', width: '100%', zIndex: 0 }}>
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

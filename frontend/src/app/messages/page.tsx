@@ -7,7 +7,7 @@ import Navbar from '@/components/Navbar';
 import { Send, MessageSquare, ArrowLeft, Search, Trash2 } from 'lucide-react';
 
 export default function MessagesPage() {
-  const { user, isLoading } = useAuth();
+  const { user } = useAuth();
   const router = useRouter();
   const [chats, setChats] = useState<any[]>([]);
   const [activeChat, setActiveChat] = useState<any | null>(null);
@@ -28,6 +28,8 @@ export default function MessagesPage() {
 
   const openChat = (chat: any) => {
     setActiveChat(chat);
+    // Mark messages as read
+    api.put('/messages/read', { otherUserId: chat.other_user_id, listingId: chat.listing_id }).catch(console.error);
     api.get(`/messages?otherUserId=${chat.other_user_id}&listingId=${chat.listing_id}`)
       .then(res => setMessages(res.data))
       .catch(console.error);
@@ -77,7 +79,6 @@ export default function MessagesPage() {
     } catch (err) { alert('Failed to send'); }
   };
 
-  if (isLoading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   if (!user) return null;
 
   return (
@@ -107,10 +108,10 @@ export default function MessagesPage() {
                 <p className="text-sm">No messages yet.</p>
               </div>
             ) : chats.map((chat, i) => (
-              <button 
+              <div 
                 key={i} 
                 onClick={() => openChat(chat)}
-                className={`group w-full text-left px-4 py-4 border-b border-gray-50 dark:border-slate-800/50 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-3 ${activeChat?.other_user_id === chat.other_user_id ? 'bg-blue-50 dark:bg-blue-900/20 border-l-4 border-l-blue-500' : 'border-l-4 border-l-transparent'}`}
+                className={`group w-full text-left px-4 py-4 border-b border-gray-50 dark:border-slate-800/50 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-3 cursor-pointer ${activeChat?.other_user_id === chat.other_user_id ? 'bg-blue-50 dark:bg-blue-900/20 border-l-4 border-l-blue-500' : 'border-l-4 border-l-transparent'}`}
               >
                 <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 text-white rounded-full flex items-center justify-center font-bold text-lg shrink-0 shadow-sm">
                   {chat.other_user_name.charAt(0)}
@@ -132,7 +133,7 @@ export default function MessagesPage() {
                   </div>
                   <p className="text-[10px] text-gray-400 dark:text-slate-500 truncate mt-0.5">Re: {chat.listing_title}</p>
                 </div>
-              </button>
+              </div>
             ))}
           </div>
         </div>

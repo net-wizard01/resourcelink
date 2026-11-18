@@ -26,28 +26,29 @@ export default function ReviewModal({ trade, onClose, onSuccess }: { trade: any,
     }
   };
 
-  const neighborName = trade.sender_name === trade.reviewer_name ? trade.receiver_name : trade.sender_name;
+  // Determine the name of the person being reviewed
+  const neighborName = trade.isReceiver ? trade.sender_name : trade.receiver_name;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95">
-        <div className="flex justify-between items-center p-6 border-b border-gray-100">
-          <h2 className="text-xl font-bold text-gray-800">Leave a Review</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200 border border-gray-100 dark:border-slate-800">
+        <div className="flex justify-between items-center p-6 border-b border-gray-100 dark:border-slate-800">
+          <h2 className="text-xl font-bold text-gray-800 dark:text-white">Leave a Review</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"><X size={20} /></button>
         </div>
         
         <form onSubmit={submitReview} className="p-6 space-y-6">
           <div className="text-center space-y-2">
-            <p className="text-gray-600">How was your trade with <span className="font-bold text-gray-800">{neighborName}</span>?</p>
+            <p className="text-gray-600 dark:text-slate-300">How was your trade with <span className="font-bold text-gray-800 dark:text-white">{neighborName}</span>?</p>
             <div className="flex justify-center py-2">
               <StarRating rating={rating} setRating={setRating} />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Leave a comment (optional)</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">Leave a comment (optional)</label>
             <textarea 
-              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none text-black h-24 resize-none"
+              className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-blue-500 outline-none text-black dark:text-white h-24 resize-none"
               placeholder="e.g. Great communication, tool was in perfect condition!"
               value={comment}
               onChange={e => setComment(e.target.value)}

@@ -1,10 +1,18 @@
 'use client';
 import { useState } from 'react';
-import { MapPin, ArrowRight, Wrench, BookOpen, Hammer, Sprout, User } from 'lucide-react';
+import Link from 'next/link';
+import { MapPin, ArrowRight, Wrench, BookOpen, Hammer, Sprout, User, AlertCircle } from 'lucide-react';
 import TradeModal from './TradeModal';
 
 export default function NearbyListings({ listings, onTraded }: { listings: any[], onTraded: () => void }) {
   const [selectedListing, setSelectedListing] = useState<any | null>(null);
+
+  // Sort urgent listings to the top
+  const sortedListings = [...listings].sort((a, b) => {
+    if (a.is_urgent && !b.is_urgent) return -1;
+    if (!a.is_urgent && b.is_urgent) return 1;
+    return a.distance_meters - b.distance_meters;
+  });
 
   const getCategoryIcon = (category: string) => {
     switch(category) {
@@ -17,23 +25,23 @@ export default function NearbyListings({ listings, onTraded }: { listings: any[]
   };
 
   return (
-    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 h-full relative">
+    <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 h-full relative transition-colors duration-300">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-bold flex items-center gap-2 text-gray-800">
+        <h2 className="text-xl font-bold flex items-center gap-2 text-gray-800 dark:text-white dark:text-white">
           <MapPin size={22} className="text-red-500" /> Nearby (5km)
         </h2>
-        <span className="text-sm font-medium text-gray-500 bg-gray-100 px-3 py-1 rounded-full">{listings.length} results</span>
+        <span className="text-sm font-medium text-gray-500 dark:text-slate-400 bg-gray-100 px-3 py-1 rounded-full">{listings.length} results</span>
       </div>
       
       <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
         {listings.length === 0 ? (
-          <div className="text-center py-10 text-gray-500 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+          <div className="text-center py-10 text-gray-500 dark:text-slate-400 bg-gray-50 rounded-xl border border-dashed border-gray-200">
             No listings nearby. Be the first to post one!
           </div>
         ) : null}
         
-        {listings.map((l, i) => (
-          <div key={i} className="group border border-gray-100 rounded-xl bg-white hover:shadow-md hover:border-blue-100 transition-all flex flex-col overflow-hidden">
+        {sortedListings.map((l, i) => (
+          <div key={i} className={`group border rounded-xl bg-white dark:bg-slate-800/50 hover:shadow-lg transition-all flex flex-col overflow-hidden ${l.is_urgent ? 'border-red-500 dark:border-red-500 shadow-[0_0_15px_rgba(239,68,68,0.3)] animate-pulse-slow' : 'border-gray-100 dark:border-slate-800 hover:border-blue-100 dark:hover:border-slate-700'}`}>
             {l.image_url && (
               <div className="w-full h-40 bg-gray-100 relative">
                 <img src={l.image_url} alt={l.title} className="w-full h-full object-cover" />
@@ -50,12 +58,12 @@ export default function NearbyListings({ listings, onTraded }: { listings: any[]
                   </div>
                 )}
                 <div>
-                  <h3 className="font-bold text-gray-800 leading-tight">{l.title}</h3>
-                  <p className="text-xs text-gray-500 flex items-center gap-1 mt-0.5">
+                  <h3 className="font-bold text-gray-800 dark:text-white leading-tight">{l.title}</h3>
+                  <p className="text-xs text-gray-500 dark:text-slate-400 flex items-center gap-1 mt-0.5">
                     {getCategoryIcon(l.category)} {l.category} ? By {l.full_name}
                   </p>
                   {l.description && (
-                    <p className="text-sm text-gray-600 mt-2 line-clamp-2">{l.description}</p>
+                    <p className="text-sm text-gray-600 dark:text-slate-300 mt-2 line-clamp-2">{l.description}</p>
                   )}
                   <p className="text-xs font-semibold text-blue-600 mt-1">Est: {l.estimated_hours} hrs</p>
                 </div>
@@ -66,7 +74,7 @@ export default function NearbyListings({ listings, onTraded }: { listings: any[]
             </div>
             
             <div className="flex items-center justify-between mt-2 pt-3 border-t border-gray-50">
-              <span className="text-xs font-medium text-gray-400 flex items-center gap-1">
+              <span className="text-xs font-medium text-gray-400 dark:text-slate-500 flex items-center gap-1">
                 <MapPin size={12} /> {Math.round(l.distance_meters)}m away
               </span>
               <button 

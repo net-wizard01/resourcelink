@@ -5,7 +5,6 @@ export const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  // Always check localStorage for the freshest token
   if (typeof window !== 'undefined') {
     const token = localStorage.getItem('token');
     if (token) {
@@ -15,13 +14,16 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Add a response interceptor to catch 401s globally
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    // If the token is invalid or expired, log the user out automatically
     if (error.response?.status === 401 && typeof window !== 'undefined') {
-      console.warn('Unauthorized request - token may be missing or expired.');
-      // Optional: window.location.href = '/login';
+      // Only redirect if we aren't already on the login page
+      if (window.location.pathname !== '/login') {
+        localStorage.clear();
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }

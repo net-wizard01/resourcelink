@@ -19,6 +19,9 @@ export default function ChatModal({ listing, otherUser, onClose }: { listing: an
   };
 
   useEffect(() => {
+    // Mark messages as read
+    api.put('/messages/read', { otherUserId: otherUser.id, listingId: listing.id }).catch(console.error);
+    
     fetchMessages();
     // Poll for new messages every 3 seconds
     const interval = setInterval(fetchMessages, 3000);
